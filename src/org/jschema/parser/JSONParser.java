@@ -13,6 +13,7 @@ import org.jschema.util.JSchemaUtils;
 
 import java.math.BigDecimal;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 
 public class JSONParser {
@@ -154,10 +155,11 @@ public class JSONParser {
       String s = parseString();
       URI uri = null;
       if (s != null) {
-        uri = JSchemaUtils.parseURI(s);
-      }
-      if (uri == null) {
-        _errors.add(new JsonParseError("Bad URI value : " + s, _currentToken.getStart(), _currentToken.getEnd()));
+        try {
+          uri = JSchemaUtils.parseURI(s);
+        } catch (URISyntaxException e) {
+          _errors.add(new JsonParseError("Bad URI value : " + s + " " + e.getMessage(), _currentToken.getStart(), _currentToken.getEnd()));
+        }
       }
       return uri;
     }

@@ -251,7 +251,7 @@ public class JSchemaUtils {
     } else if (json instanceof String) {
       if (parseDate(json.toString()) != null) {
         return "date";
-      } else if (parseURI(json.toString()) != null) {
+      } else if (validURI(json.toString())) {
         return "uri";
       } else {
         return "string";
@@ -481,14 +481,23 @@ public class JSchemaUtils {
     return sb.toString();
   }
 
-  public static URI parseURI(String s) {
+  public static URI parseURI(String s) throws URISyntaxException {
+    URI uri = new URI(s);
+    if (uri.getScheme() == null) {
+      throw new URISyntaxException(s, "No valid scheme found");
+    } else {
+      return uri;
+    }
+  }
+
+  public static boolean validURI(String s) {
     try {
       URI uri = new URI(s);
       if (uri.getScheme() != null) {
-        return uri;
+        return true;
       }
     } catch (URISyntaxException e) {
     }
-    return null;
+    return false;
   }
 }
