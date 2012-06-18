@@ -57,7 +57,7 @@ public class JSchemaTypeLoaderTest extends GosonTest {
 
     assertNull(TypeSystem.getByFullNameIfValid("org.jschema.examples.rpc.Sample1.GetEmployee.Id"));
 
-    assertNull(TypeSystem.getByFullNameIfValid("org.jschema.examples.rpc.Sample1.UpdateEmployee"));
+    assertNotNull(TypeSystem.getByFullNameIfValid("org.jschema.examples.rpc.Sample1.UpdateEmployee"));
     assertNotNull(TypeSystem.getByFullName("org.jschema.examples.rpc.Sample1.UpdateEmployee.Employee"));
   }
 

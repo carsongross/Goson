@@ -16,8 +16,10 @@ import org.jschema.typeloader.rpc.JSchemaCustomizedRPCType;
 import org.jschema.typeloader.rpc.JSchemaRPCType;
 import org.jschema.util.JSchemaUtils;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
+import java.util.logging.Logger;
 
 public class JSchemaTypeLoader extends TypeLoaderBase {
 
@@ -376,29 +378,31 @@ public class JSchemaTypeLoader extends TypeLoaderBase {
     }
 
     public void parseContent() {
-      Scanner s = null;
       try {
         StringBuilder jsonString = new StringBuilder();
-        s = new Scanner(file.toJavaFile());
+        InputStream src = file.openInputStream();
+        Scanner s = new Scanner(src);
         while (s.hasNextLine()) {
           jsonString.append(s.nextLine());
           jsonString.append("\n");
         }
         stringContent = jsonString.toString();
-      } catch (FileNotFoundException e) {
-        throw new RuntimeException(e);
-      }
-      JSchemaParser parser = new JSchemaParser(stringContent);
-      try{
-        content = parser.parseJSchema();
-      } catch (JsonParseException e) {
-        content = parser.getValue();
-        if (content == null) {
-          content = new JsonMap();
+        JSchemaParser parser = new JSchemaParser(stringContent);
+        try{
+          content = parser.parseJSchema();
+        } catch (JsonParseException e) {
+          content = parser.getValue();
+          if (content == null) {
+            content = new JsonMap();
+          }
+          errors = parser.getErrors();
+        } finally {
+          s.close();
         }
-        errors = parser.getErrors();
-      } finally {
-        if (s != null) { s.close(); }
+      } catch (IOException e) {
+        content = new JsonMap();
+        errors = new ArrayList<JsonParseError>();
+        errors.add(new JsonParseError("Unable to open JSON file " + file.getPath().getFileSystemPathString() + ": " + e.getMessage(), 0, 0));
       }
     }
   }
